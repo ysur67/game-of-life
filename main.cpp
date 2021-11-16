@@ -2,6 +2,7 @@
 #include <chrono>
 #include <thread>
 #include <vector>
+#include <random>
 
 using std::cout;
 using std::vector;
@@ -82,7 +83,12 @@ int main()
     {
         for (int j = 0; j < mapSize; j++)
         {
-            if (i % 2 == 0 || j % 2 == 0)
+            std::random_device rd;   
+            std::mt19937 rng(rd());    
+            std::uniform_int_distribution<int> uni(1, 2); 
+
+            auto randomInt = uni(rng);
+            if (randomInt % 2 == 0)
             {
                 grid[i][j] = true;
             }
