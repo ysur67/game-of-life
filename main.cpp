@@ -123,6 +123,7 @@ private:
     
     void calculate()
     {
+        // TODO: ref
         for (int i = 0; i < baseSize; i++)
         {
             for (int j = 0; j < baseSize; j++)
@@ -154,6 +155,7 @@ private:
 
 int main()
 {
+    // TODO: ref
     const int mapSize = 26;
     LifeMap map = LifeMap(mapSize);
     map.setUp();
