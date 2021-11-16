@@ -8,98 +8,155 @@ using std::cout;
 using std::vector;
 
 
-const int mapSize = 26;
 
-void updateScreen(vector<vector<bool>> grid)
+
+class Cell 
 {
-    for (int i = 0; i < mapSize; i++)
+    bool _isAlive;
+    int row;
+    int col;
+
+public:
+    Cell(bool isAlive, int row, int col)
     {
-        for (int j = 0; j < mapSize; j++)
-        {
-            if (grid[i][j]) 
-            {
-                cout << "0";
-            }
-            else
-            {
-                cout << ".";
-            }
-        }
-        cout << std::endl;
+        this->_isAlive = isAlive;
+        this->row = row;
+        this->col = col;
     }
-}
 
-vector<vector<bool>> updateState(vector<vector<bool>> grid)
-{
-    for (int i = 0; i < mapSize; i++)
+    bool isAlive()
     {
-        for (int j = 0; j < mapSize; j++)
+        return _isAlive;
+    }
+
+    Cell mutate(int siblingsAlive)
+    {
+        if (siblingsAlive < 2 || siblingsAlive > 3)
+            return Cell(false, row, col);
+
+        return Cell(true, row, col); 
+    }
+};
+
+class LifeMap
+{
+    int baseSize;
+    bool isActive;
+    vector<vector<Cell>> grid;
+
+public:
+    LifeMap(int baseSize)
+    {
+        this->isActive = true;
+        this->baseSize = baseSize;
+    }
+
+    void setUp()
+    {
+        this->grid = createGrid();
+        this->randomizeCells();
+    }
+
+    void update()
+    {
+        while(this->isActive)
         {
-            int life = 0;
-            for (int c = -1; c < 2; c++) 
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            std::system("clear");
+            this->draw();
+            this->calculate();
+        }
+    }
+
+private:
+    vector<vector<Cell>> createGrid()
+    {
+        vector<vector<Cell>> grid = {};
+        for (int i = 0; i < baseSize + 1; i++) 
+        {
+            vector<Cell> newVector;
+            for (int j = 0; j < baseSize + 1; j++)
             {
-                if (i == 0 && c == -1) 
+                newVector.push_back(Cell(false, i, j));
+            }
+            grid.push_back(newVector);
+        }
+        return grid;
+    }
+
+    void randomizeCells()
+    {
+        for (int i = 0; i < baseSize; i++)
+        {
+            for (int j = 0; j < baseSize; j++)
+            {
+                std::random_device rd;   
+                std::mt19937 rng(rd());    
+                std::uniform_int_distribution<int> uni(1, 2); 
+                auto randomInt = uni(rng);
+                if (randomInt % 2 == 0)
                 {
-                    continue;
-                } 
-                for (int d = -1; d < 2; d++)
-                {
-                    if (c == 0 && d == 0)
-                        continue;
-                    if (j == 0 && d == -1)
-                    {
-                        continue;
-                    }
-                    if (grid[i+c][j+d])
-                        life++;
+                    grid[i][j] = Cell(true, i, j);
                 }
             }
-            if (life < 2 || life > 3)
+        }
+    }
+
+    void draw()
+    {
+        for (int i = 0; i < baseSize; i++)
+        {
+            for (int j = 0; j < baseSize; j++)
             {
-                grid[i][j] = false;
+                if (grid[i][j].isAlive()) 
+                {
+                    cout << "0";
+                }
+                else
+                {
+                    cout << ".";
+                }
             }
-            else if (life == 3)
+            cout << std::endl;
+        }
+    }
+    
+    void calculate()
+    {
+        for (int i = 0; i < baseSize; i++)
+        {
+            for (int j = 0; j < baseSize; j++)
             {
-                grid[i][j] = true;
+                int life = 0;
+                for (int c = -1; c < 2; c++) 
+                {
+                    if (i == 0 && c == -1) 
+                    {
+                        continue;
+                    } 
+                    for (int d = -1; d < 2; d++)
+                    {
+                        if (c == 0 && d == 0)
+                            continue;
+                        if (j == 0 && d == -1)
+                        {
+                            continue;
+                        }
+                        if (grid[i+c][j+d].isAlive())
+                            life++;
+                    }
+                }
+                grid[i][j] = grid[i][j].mutate(life);
             }
         }
     }
-    return grid;
-}
+};
 
 int main()
 {
-    vector<vector<bool>> grid = {};
-    for (int i = 0; i < mapSize + 1; i++) 
-    {
-        vector<bool> newVector;
-        for (int j = 0; j < mapSize + 1; j++)
-        {
-            newVector.push_back(false);
-        }
-        grid.push_back(newVector);
-    }
-    for (int i = 0; i < mapSize; i++)
-    {
-        for (int j = 0; j < mapSize; j++)
-        {
-            std::random_device rd;   
-            std::mt19937 rng(rd());    
-            std::uniform_int_distribution<int> uni(1, 2); 
-
-            auto randomInt = uni(rng);
-            if (randomInt % 2 == 0)
-            {
-                grid[i][j] = true;
-            }
-        }
-    }
-    while (true)
-    {
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        std::system("clear");
-        updateScreen(grid); 
-        grid = updateState(grid);
-    }
+    const int mapSize = 26;
+    LifeMap map = LifeMap(mapSize);
+    map.setUp();
+    map.update();
     return 0;
 }
