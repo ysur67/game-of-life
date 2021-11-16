@@ -78,11 +78,16 @@ int main()
         }
         grid.push_back(newVector);
     }
-    grid[mapSize/2][mapSize/2] = true;
-    grid[mapSize/2][mapSize/2 + 1] = true;
-    grid[mapSize/2][mapSize/2 - 1] = true;
-    grid[mapSize/2 + 1][mapSize/2] = true;
-    grid[mapSize/2 - 1][mapSize/2] = true;
+    for (int i = 0; i < mapSize; i++)
+    {
+        for (int j = 0; j < mapSize; j++)
+        {
+            if (i % 2 == 0 || j % 2 == 0)
+            {
+                grid[i][j] = true;
+            }
+        }
+    }
     while (true)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
