@@ -92,9 +92,9 @@ private:
             {
                 std::random_device rd;   
                 std::mt19937 rng(rd());    
-                std::uniform_int_distribution<int> uni(1, 2); 
+                std::uniform_int_distribution<int> uni(1, 50); 
                 auto randomInt = uni(rng);
-                if (randomInt % 2 == 0)
+                if (randomInt == 1)
                 {
                     grid[i][j] = Cell(true, i, j);
                 }
@@ -114,7 +114,7 @@ private:
                 }
                 else
                 {
-                    cout << ".";
+                    cout << " ";
                 }
             }
             cout << std::endl;
@@ -128,7 +128,7 @@ private:
         {
             for (int j = 0; j < baseSize; j++)
             {
-                int life = 0;
+                int aliveSiblings = 0;
                 for (int c = -1; c < 2; c++) 
                 {
                     if (i == 0 && c == -1) 
@@ -144,10 +144,10 @@ private:
                             continue;
                         }
                         if (grid[i+c][j+d].isAlive())
-                            life++;
+                            aliveSiblings++;
                     }
                 }
-                grid[i][j] = grid[i][j].mutate(life);
+                grid[i][j] = grid[i][j].mutate(aliveSiblings);
             }
         }
     }
@@ -156,7 +156,7 @@ private:
 int main()
 {
     // TODO: ref
-    const int mapSize = 26;
+    const int mapSize = 40;
     LifeMap map = LifeMap(mapSize);
     map.setUp();
     map.update();
